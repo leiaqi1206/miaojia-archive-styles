@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>喵家档案｜日系蓝调杂货 · 多猫家庭健康记录系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f9fa;
+      --paper: #ffffff;
+      --surface-subtle: #eaf0f6;
+      --text-main: #2d3748;
+      --text-muted: #5a6a80;
+      --indigo-navy: #2c3e55;
+      --indigo-hover: #1e2c3d;
+      --slate-blue: #4a6572;
+      --duck-egg: #8fa7be;
+      --accent-sage: #5b8c85;
+      --accent-warm: #d99b73;
+      --border-color: #dbe4ee;
+      --washi-tape: rgba(188, 206, 222, 0.65);
+      --washi-tape-alt: rgba(217, 155, 115, 0.35);
+      --shadow-zakka: 0 10px 30px rgba(44, 62, 85, 0.06);
+      --shadow-hover: 0 16px 36px rgba(44, 62, 85, 0.12);
+      --font-heading: 'Zen Maru Gothic', 'PingFang SC', sans-serif;
+      --font-body: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, .font-heading { font-family: var(--font-heading); }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--duck-egg); border-radius: 4px; }
+
+    /* Zakka Card & Washi Tape Styles */
+    .zakka-card {
+      background: var(--paper);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: var(--shadow-zakka);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .zakka-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .washi-tape-top {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 90px;
+      height: 24px;
+      background: var(--washi-tape);
+      backdrop-filter: blur(2px);
+      border-left: 2px dashed rgba(255,255,255,0.6);
+      border-right: 2px dashed rgba(255,255,255,0.6);
+      z-index: 10;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    }
+
+    .washi-tape-corner {
+      position: absolute;
+      top: -10px;
+      right: 15px;
+      transform: rotate(12deg);
+      width: 75px;
+      height: 22px;
+      background: var(--washi-tape-alt);
+      backdrop-filter: blur(2px);
+      z-index: 10;
+    }
+
+    /* Polaroid Visual Style */
+    .polaroid-frame {
+      background: #ffffff;
+      padding: 14px 14px 36px 14px;
+      box-shadow: 0 12px 28px rgba(44, 62, 85, 0.1);
+      border-radius: 4px;
+      border: 1px solid #ebf0f5;
+    }
+
+    .stamp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border: 1.5px dashed var(--slate-blue);
+      border-radius: 6px;
+      color: var(--indigo-navy);
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: rgba(234, 240, 246, 0.6);
+    }
+
+    /* Navigation Glassmorphism */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(247, 249, 250, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Active State Badges */
+    .cat-tab.active {
+      background-color: var(--indigo-navy) !important;
+      color: #ffffff !important;
+      border-color: var(--indigo-navy) !important;
+      box-shadow: 0 4px 12px rgba(44, 62, 85, 0.2);
+    }
+
+    /* Gentle Pulse Animation */
+    @keyframes pulse-gentle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.1); }
+    }
+    .status-pulse { animation: pulse-gentle 2.5s infinite ease-in-out; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-slate-200 selection:text-slate-800">
+
+  <!-- Header Navigation -->
+  <header class="topbar">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-18 py-3.5 flex items-center justify-between">
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-full bg-[#2c3e55] text-white flex items-center justify-center font-bold text-lg shadow-sm group-hover:scale-105 transition-transform duration-200">
+          🐾
+        </div>
+        <div>
+          <span class="font-heading font-bold text-lg tracking-tight text-[#2d3748] block leading-tight">喵家档案</span>
+          <span class="text-[10px] text-[#5a6a80] tracking-widest block uppercase font-medium">Aojikan Zakka Notes</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center gap-1 bg-[#eaf0f6]/80 p-1 rounded-full border border-[#dbe4ee]">
+        <a href="#features" class="px-4 py-1.5 text-xs font-medium text-[#5a6a80] hover:text-[#2d3748] hover:bg-white rounded-full transition-all">手帐特色</a>
+        <a href="#demo" class="px-4 py-1.5 text-xs font-medium text-[#5a6a80] hover:text-[#2d3748] hover:bg-white rounded-full transition-all">猫咪名册</a>
+        <a href="#steps" class="px-4 py-1.5 text-xs font-medium text-[#5a6a80] hover:text-[#2d3748] hover:bg-white rounded-full transition-all">建档步骤</a>
+        <a href="#faq" class="px-4 py-1.5 text-xs font-medium text-[#5a6a80] hover:text-[#2d3748] hover:bg-white rounded-full transition-all">答疑指南</a>
+      </nav>
+
+      <!-- Action Button -->
+      <div class="flex items-center gap-3">
+        <button onclick="openLogModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#2c3e55] hover:bg-[#1e2c3d] text-white text-xs font-medium shadow-sm transition-all transform hover:-translate-y-0.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          记一笔健康日志
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow">
+
+    <!-- HERO SECTION -->
+    <section class="relative pt-10 pb-16 md:pt-16 md:pb-24 overflow-hidden">
+      <!-- Background Ambient Glow -->
+      <div class="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-6xl h-80 bg-gradient-to-br from-[#eaf0f6]/80 via-[#f0f4f8]/50 to-transparent rounded-full blur-3xl -z-10"></div>
+      
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+          
+          <!-- Left Column Copy -->
+          <div class="lg:col-span-7 text-left space-y-6">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#eaf0f6] border border-[#dbe4ee] text-[#2c3e55] text-xs font-medium">
+              <span class="w-2 h-2 rounded-full bg-[#5b8c85] status-pulse"></span>
+              日系蓝调杂货风 · 多猫协同健康管理
+            </div>
+
+            <h1 class="text-3xl sm:text-5xl font-bold tracking-tight text-[#2d3748] leading-[1.2]">
+              温润清爽，<br/>
+              给每只猫咪的<span class="text-[#2c3e55] border-b-2 border-dashed border-[#8fa7be] pb-0.5">专属成长蓝图</span>
+            </h1>
+
+            <p class="text-sm sm:text-base text-[#5a6a80] leading-relaxed max-w-xl font-light">
+              体重起伏、疫苗间隔、驱虫提醒与日常饮食变迁。摒弃繁复的表格，如同翻开一本清雅的日系杂货相册，全家人协同记录，随时掌握毛孩子的健康点滴。
+            </p>
+
+            <!-- CTA Buttons -->
+            <div class="pt-2 flex flex-wrap items-center gap-4">
+              <a href="#demo" class="px-6 py-3 rounded-full bg-[#2c3e55] hover:bg-[#1e2c3d] text-white text-xs sm:text-sm font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+                <span>体验多猫档案</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </a>
+              <button onclick="openLogModal()" class="px-5 py-3 rounded-full bg-white border border-[#dbe4ee] hover:border-[#8fa7be] text-[#2c3e55] text-xs sm:text-sm font-medium transition-all">
+                + 添加健康记录
+              </button>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="pt-6 grid grid-cols-3 gap-4 border-t border-[#dbe4ee] max-w-md">
+              <div>
+                <span class="block text-xl font-bold text-[#2d3748] font-heading">多猫</span>
+                <span class="text-[11px] text-[#5a6a80]">独立档案卡片</span>
+              </div>
+              <div>
+                <span class="block text-xl font-bold text-[#2d3748] font-heading">云同步</span>
+                <span class="text-[11px] text-[#5a6a80]">全家共同守护</span>
+              </div>
+              <div>
+                <span class="block text-xl font-bold text-[#2d3748] font-heading">智能</span>
+                <span class="text-[11px] text-[#5a6a80]">周期自动计算</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Zakka Polaroid Card -->
+          <div class="lg:col-span-5 relative flex justify-center">
+            <div class="relative w-full max-w-xs sm:max-w-sm">
+              <div class="washi-tape-top"></div>
+              
+              <!-- Polaroid Main Container -->
+              <div class="polaroid-frame transform -rotate-2 hover:rotate-0 transition-transform duration-300">
+                <div class="relative aspect-[4/3] bg-[#eaf0f6] rounded overflow-hidden mb-3">
+                  <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80" alt="夏目 Natsume" class="w-full h-full object-cover">
+                  <div class="absolute bottom-2 left-2 px-2.5 py-1 bg-black/40 backdrop-blur-md rounded text-[10px] text-white font-medium">
+                    ✦ 喵家名册 No.01
+                  </div>
+                </div>
+
+                <div class="space-y-2 px-1">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-base font-bold text-[#2d3748] font-heading">夏目 (Natsume)</h3>
+                    <span class="stamp-badge">英国短毛猫 · 3岁</span>
+                  </div>
+                  <p class="text-xs text-[#5a6a80] line-clamp-2">性格温柔粘人，喜欢阳台晒太阳。近期体重稳定在 4.35 kg。</p>
+                  
+                  <div class="pt-2 flex items-center justify-between border-t border-slate-100 text-[11px] text-[#5a6a80]">
+                    <span>体外驱虫：12天前</span>
+                    <span class="text-[#5b8c85] font-medium">状态：良好 🐾</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Secondary Floating Badge -->
+              <div class="absolute -bottom-5 -left-5 bg-white p-3.5 rounded-xl shadow-lg border border-[#dbe4ee] max-w-[190px] transform rotate-3 hidden sm:block">
+                <div class="flex items-center gap-1.5 mb-1">
+                  <div class="w-2 h-2 rounded-full bg-[#5b8c85]"></div>
+                  <span class="text-xs font-bold text-[#2d3748]">疫苗周期提醒</span>
+                </div>
+                <p class="text-[11px] text-[#5a6a80]">距下次妙三多接种还有 <span class="text-[#2c3e55] font-bold">45</span> 天</p>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE CAT SELECTOR DEMO -->
+    <section id="demo" class="py-14 bg-[#eaf0f6]/60 border-y border-[#dbe4ee]">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        
+        <div class="text-center max-w-xl mx-auto mb-10">
+          <span class="text-[11px] font-bold tracking-widest text-[#4a6572] uppercase block mb-1">Interactive Profiles</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-[#2d3748]">切换猫咪，体验动态手帐</h2>
+          <p class="text-xs sm:text-sm text-[#5a6a80] mt-1">点击下方猫咪，查看不同的健康数据与成长轨迹</p>
+        </div>
+
+        <!-- Cat Tabs -->
+        <div class="flex justify-center gap-2.5 mb-8 flex-wrap" id="catTabContainer">
+          <button onclick="switchCat('natsume')" id="tab-natsume" class="cat-tab active px-4 py-2 rounded-full border border-[#dbe4ee] text-xs font-medium transition-all bg-white text-[#5a6a80]">
+            🐱 夏目 (Natsume)
+          </button>
+          <button onclick="switchCat('mikan')" id="tab-mikan" class="cat-tab px-4 py-2 rounded-full border border-[#dbe4ee] text-xs font-medium transition-all bg-white text-[#5a6a80] hover:bg-slate-50">
+            🍊 蜜柑 (Mikan)
+          </button>
+          <button onclick="switchCat('sora')" id="tab-sora" class="cat-tab px-4 py-2 rounded-full border border-[#dbe4ee] text-xs font-medium transition-all bg-white text-[#5a6a80] hover:bg-slate-50">
+            ☁️ 空空 (Sora)
+          </button>
+          <button onclick="switchCat('yuzu')" id="tab-yuzu" class="cat-tab px-4 py-2 rounded-full border border-[#dbe4ee] text-xs font-medium transition-all bg-white text-[#5a6a80] hover:bg-slate-50">
+            🍋 柚子 (Yuzu)
+          </button>
+        </div>
+
+        <!-- Dynamic Profile Card -->
+        <div class="bg-white rounded-2xl border border-[#dbe4ee] p-6 sm:p-8 shadow-sm">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center" id="catProfileDisplay">
+            
+            <!-- Left Info & Avatar -->
+            <div class="lg:col-span-4 text-center lg:text-left border-b lg:border-b-0 lg:border-r border-[#dbe4ee] pb-6 lg:pb-0 lg:pr-8">
+              <div class="relative w-32 h-32 mx-auto lg:mx-0 rounded-full overflow-hidden border-4 border-[#eaf0f6] shadow-sm mb-4">
+                <img id="catAvatar" src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=400&q=80" alt="Cat Avatar" class="w-full h-full object-cover">
+              </div>
+              <h3 id="catName" class="text-xl font-bold text-[#2d3748] font-heading">夏目 (Natsume)</h3>
+              <p id="catBreed" class="text-xs text-[#5a6a80] mt-1">英国短毛猫 · 蓝灰色 · 3岁2个月</p>
+              
+              <div class="mt-4 flex justify-center lg:justify-start gap-2">
+                <span id="catTag1" class="px-2.5 py-1 bg-[#eaf0f6] text-[#2c3e55] text-[11px] rounded-md font-medium">已绝育</span>
+                <span id="catTag2" class="px-2.5 py-1 bg-[#eaf0f6] text-[#2c3e55] text-[11px] rounded-md font-medium">芯片登记</span>
+              </div>
+            </div>
+
+            <!-- Health Metrics & Timeline -->
+            <div class="lg:col-span-8 space-y-6">
+              
+              <!-- Metrics Cards -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-[#f7f9fa] p-3 rounded-xl border border-[#eaf0f6]">
+                  <span class="text-[11px] text-[#5a6a80] block">最新体重</span>
+                  <span id="catWeight" class="text-lg font-bold text-[#2c3e55] font-heading">4.35 kg</span>
+                  <span class="text-[10px] text-[#5b8c85] block mt-0.5">↑ 0.1kg 比上月</span>
+                </div>
+                <div class="bg-[#f7f9fa] p-3 rounded-xl border border-[#eaf0f6]">
+                  <span class="text-[11px] text-[#5a6a80] block">核心疫苗</span>
+                  <span id="catVaccine" class="text-lg font-bold text-[#2c3e55] font-heading">已完成</span>
+                  <span class="text-[10px] text-[#5a6a80] block mt-0.5">有效期至 2027-05</span>
+                </div>
+                <div class="bg-[#f7f9fa] p-3 rounded-xl border border-[#eaf0f6]">
+                  <span class="text-[11px] text-[#5a6a80] block">体内外驱虫</span>
+                  <span id="catDeworm" class="text-lg font-bold text-[#2c3e55] font-heading">12天前</span>
+                  <span class="text-[10px] text-[#5a6a80] block mt-0.5">下次: 18天后</span>
+                </div>
+                <div class="bg-[#f7f9fa] p-3 rounded-xl border border-[#eaf0f6]">
+                  <span class="text-[11px] text-[#5a6a80] block">日常饮食</span>
+                  <span id="catDiet" class="text-lg font-bold text-[#2c3e55] font-heading">低敏胃肠</span>
+                  <span class="text-[10px] text-[#5a6a80] block mt-0.5">每日 55g + 罐头</span>
+                </div>
+              </div>
+
+              <!-- Interactive Timeline -->
+              <div class="bg-[#f7f9fa] rounded-xl p-4 border border-[#eaf0f6]">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-xs font-bold text-[#2d3748]">最近健康记录</h4>
+                  <button onclick="openLogModal()" class="text-[11px] text-[#4a6572] hover:underline font-medium">+ 记一笔</button>
+                </div>
+                <ul class="space-y-2.5 text-xs text-[#5a6a80]" id="catTimeline">
+                  <!-- Javascript updates this -->
+                </ul>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CORE FEATURES GRID -->
+    <section id="features" class="py-16 sm:py-20">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        
+        <div class="text-center max-w-xl mx-auto mb-14">
+          <span class="text-[11px] font-bold tracking-widest text-[#4a6572] uppercase block mb-1">ZAKKA FEATURES</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-[#2d3748]">细致入微的猫咪管家</h2>
+          <p class="text-xs sm:text-sm text-[#5a6a80] mt-1">专为多猫家庭设计的日系风格档案卡，记录毛孩子点滴</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          <div class="zakka-card p-6 flex flex-col justify-between">
+            <div class="washi-tape-corner"></div>
+            <div>
+              <div class="w-10 h-10 rounded-full bg-[#eaf0f6] text-[#2c3e55] flex items-center justify-center mb-4">
+                📋
+              </div>
+              <h3 class="text-base font-bold text-[#2d3748] mb-2 font-heading">独立档案卡片</h3>
+              <p class="text-xs text-[#5a6a80] leading-relaxed">
+                每只猫咪拥有一张专属身份卡，包含品种、生日、绝育状态与独特癖好，支持无上限切换。
+              </p>
+            </div>
+            <div class="mt-6 pt-3 border-t border-slate-100 text-[11px] text-[#4a6572] font-medium">
+              ✦ 一键快速切换
+            </div>
+          </div>
+
+          <div class="zakka-card p-6 flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-full bg-[#eaf0f6] text-[#2c3e55] flex items-center justify-center mb-4">
+                ⚖️
+              </div>
+              <h3 class="text-base font-bold text-[#2d3748] mb-2 font-heading">体重健康曲线</h3>
+              <p class="text-xs text-[#5a6a80] leading-relaxed">
+                输入日常称重记录，系统自动对比上月数据，及时捕捉发胖或异常消瘦信号。
+              </p>
+            </div>
+            <div class="mt-6 pt-3 border-t border-slate-100 text-[11px] text-[#4a6572] font-medium">
+              ✦ 体重异常预警
+            </div>
+          </div>
+
+          <div class="zakka-card p-6 flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-full bg-[#eaf0f6] text-[#2c3e55] flex items-center justify-center mb-4">
+                💉
+              </div>
+              <h3 class="text-base font-bold text-[#2d3748] mb-2 font-heading">驱虫疫苗日历</h3>
+              <p class="text-xs text-[#5a6a80] leading-relaxed">
+                疫苗、体检与内外驱虫周期自动倒计时计算，再也不用担心错过接种时间。
+              </p>
+            </div>
+            <div class="mt-6 pt-3 border-t border-slate-100 text-[11px] text-[#4a6572] font-medium">
+              ✦ 智能倒计时提醒
+            </div>
+          </div>
+
+          <div class="zakka-card p-6 flex flex-col justify-between">
+            <div class="washi-tape-corner"></div>
+            <div>
+              <div class="w-10 h-10 rounded-full bg-[#eaf0f6] text-[#2c3e55] flex items-center justify-center mb-4">
+                🏡
+              </div>
+              <h3 class="text-base font-bold text-[#2d3748] mb-2 font-heading">全家多端共享</h3>
+              <p class="text-xs text-[#5a6a80] leading-relaxed">
+                邀请家人共同加入喵家手帐，一人录入，全端同步，告别重复喂食与沟通漏项。
+              </p>
+            </div>
+            <div class="mt-6 pt-3 border-t border-slate-100 text-[11px] text-[#4a6572] font-medium">
+              ✦ 协同云端记录
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- STEPS SECTION -->
+    <section id="steps" class="py-14 bg-[#eaf0f6]/50 border-t border-[#dbe4ee]">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6">
+        
+        <div class="text-center max-w-xl mx-auto mb-12">
+          <span class="text-[11px] font-bold tracking-widest text-[#4a6572] uppercase block mb-1">EASY WORKFLOW</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-[#2d3748]">三步开启喵家手帐</h2>
+          <p class="text-xs sm:text-sm text-[#5a6a80] mt-1">清雅质朴，几分钟内建好属于你的猫咪档案</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white p-6 rounded-2xl border border-[#dbe4ee] space-y-3">
+            <div class="w-8 h-8 rounded-full bg-[#2c3e55] text-white flex items-center justify-center font-bold text-xs font-heading">01</div>
+            <h3 class="text-base font-bold text-[#2d3748]">建档录入</h3>
+            <p class="text-xs text-[#5a6a80] leading-relaxed">上传可爱的照片，填写名字、生日与基础特征，生成日系杂货风格档案卡。</p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl border border-[#dbe4ee] space-y-3">
+            <div class="w-8 h-8 rounded-full bg-[#2c3e55] text-white flex items-center justify-center font-bold text-xs font-heading">02</div>
+            <h3 class="text-base font-bold text-[#2d3748]">周期设定</h3>
+            <p class="text-xs text-[#5a6a80] leading-relaxed">输入上次打针或驱虫日期，系统自动推算下一次接种与复查的健康倒计时。</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-[#dbe4ee] space-y-3">
+            <div class="w-8 h-8 rounded-full bg-[#2c3e55] text-white flex items-center justify-center font-bold text-xs font-heading">03</div>
+            <h3 class="text-base font-bold text-[#2d3748]">全家共享</h3>
+            <p class="text-xs text-[#5a6a80] leading-relaxed">分享专属邀请二维码给家庭成员，随时随地共同记录毛孩子的点滴成长。</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section id="faq" class="py-16">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-10">
+          <span class="text-[11px] font-bold tracking-widest text-[#4a6572] uppercase block mb-1">QUESTIONS & ANSWERS</span>
+          <h2 class="text-2xl font-bold text-[#2d3748]">常见解答</h2>
+        </div>
+
+        <div class="space-y-3 text-left">
+          <div class="bg-white p-4 sm:p-5 rounded-xl border border-[#dbe4ee]">
+            <h3 class="text-sm font-bold text-[#2d3748] mb-1 font-heading">Q: 喵家档案支持记录多少只猫咪？</h3>
+            <p class="text-xs text-[#5a6a80]">A: 完全无限制。无论是一猫独宠还是多猫大家庭，均可快速切换 independent 专属档案。</p>
+          </div>
+          <div class="bg-white p-4 sm:p-5 rounded-xl border border-[#dbe4ee]">
+            <h3 class="text-sm font-bold text-[#2d3748] mb-1 font-heading">Q: 记录的数据会丢失或公开吗？</h3>
+            <p class="text-xs text-[#5a6a80]">A: 所有健康数据加密保存，仅限你和被邀请的家庭成员访问，不会公开到社交平台。</p>
+          </div>
+          <div class="bg-white p-4 sm:p-5 rounded-xl border border-[#dbe4ee]">
+            <h3 class="text-sm font-bold text-[#2d3748] mb-1 font-heading">Q: 手机和电脑端都能正常打开吗？</h3>
+            <p class="text-xs text-[#5a6a80]">A: 支持，完全适配响应式屏幕，手机移动端、平板与桌面端浏览器均可流畅访问。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA BANNER -->
+    <section class="py-14 bg-[#eaf0f6] border-t border-[#dbe4ee]">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+        <div class="bg-white p-8 sm:p-10 rounded-2xl border border-[#dbe4ee] shadow-sm relative">
+          <div class="washi-tape-top"></div>
+          <h2 class="text-2xl font-bold text-[#2d3748] mb-2">为毛孩子开启第一份日系手帐</h2>
+          <p class="text-xs sm:text-sm text-[#5a6a80] max-w-md mx-auto mb-6">
+            细致记录点滴变化，用心守护相伴时光。
+          </p>
+          <div class="flex flex-col sm:flex-row justify-center gap-3">
+            <button onclick="openLogModal()" class="px-6 py-3 rounded-full bg-[#2c3e55] hover:bg-[#1e2c3d] text-white text-xs sm:text-sm font-medium shadow transition-all">
+              + 记录第一笔数据
+            </button>
+            <a href="#demo" class="px-6 py-3 rounded-full border border-[#dbe4ee] text-[#2c3e55] text-xs sm:text-sm font-medium hover:bg-slate-50 transition-all">
+              查看演示猫咪
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-[#dbe4ee] py-6">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#5a6a80]">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-[#5b8c85]"></span>
+        <span>喵家档案 · Aojikan Zakka Notes Edition</span>
+      </div>
+      <div>
+        © 2026 喵家档案. Multi-cat Health Tracking System.
+      </div>
+    </div>
+  </footer>
+
+  <!-- INTERACTIVE LOG ENTRY MODAL -->
+  <div id="logModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full border border-[#dbe4ee] shadow-xl relative animate-in fade-in duration-200">
+      <div class="washi-tape-top"></div>
+      
+      <button onclick="closeLogModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg">✕</button>
+
+      <div class="space-y-4">
+        <div class="text-center">
+          <span class="text-2xl">🐾</span>
+          <h3 class="text-lg font-bold text-[#2d3748] font-heading mt-1">添加健康日志</h3>
+          <p class="text-xs text-[#5a6a80]">为选中的猫咪快速记一笔</p>
+        </div>
+
+        <form id="healthLogForm" onsubmit="handleFormSubmit(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block text-[#2d3748] font-medium mb-1">选择猫咪</label>
+            <select id="modalCatSelect" class="w-full p-2.5 rounded-lg border border-[#dbe4ee] bg-slate-50 text-[#2d3748] focus:outline-none focus:border-[#2c3e55]">
+              <option value="natsume">夏目 (Natsume)</option>
+              <option value="mikan">蜜柑 (Mikan)</option>
+              <option value="sora">空空 (Sora)</option>
+              <option value="yuzu">柚子 (Yuzu)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[#2d3748] font-medium mb-1">记录类型</label>
+            <select id="modalRecordType" class="w-full p-2.5 rounded-lg border border-[#dbe4ee] bg-slate-50 text-[#2d3748] focus:outline-none focus:border-[#2c3e55]">
+              <option value="体重测量">⚖️ 体重测量</option>
+              <option value="体外/体内驱虫">🐛 体外/体内驱虫</option>
+              <option value="疫苗接种">💉 疫苗接种</option>
+              <option value="医疗就诊">🏥 医疗就诊</option>
+              <option value="饮食变动">🥣 饮食变动</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[#2d3748] font-medium mb-1">详细描述</label>
+            <input type="text" id="modalLogText" required placeholder="例如: 测得体重 4.40kg 或 使用博来恩外驱" class="w-full p-2.5 rounded-lg border border-[#dbe4ee] bg-slate-50 text-[#2d3748] focus:outline-none focus:border-[#2c3e55]">
+          </div>
+
+          <div>
+            <label class="block text-[#2d3748] font-medium mb-1">日期</label>
+            <input type="date" id="modalLogDate" required class="w-full p-2.5 rounded-lg border border-[#dbe4ee] bg-slate-50 text-[#2d3748] focus:outline-none focus:border-[#2c3e55]">
+          </div>
+
+          <div class="pt-2 space-y-2">
+            <button type="submit" class="w-full py-2.5 rounded-full bg-[#2c3e55] text-white font-medium hover:bg-[#1e2c3d] transition-all">
+              保存记录
+            </button>
+            <button type="button" onclick="closeLogModal()" class="w-full py-2 rounded-full text-[#5a6a80] hover:bg-slate-50">
+              取消
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Multi-Cat Data Store
+    const catData = {
+      natsume: {
+        name: "夏目 (Natsume)",
+        breed: "英国短毛猫 · 蓝灰色 · 3岁2个月",
+        avatar: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=400&q=80",
+        tag1: "已绝育",
+        tag2: "芯片登记",
+        weight: "4.35 kg",
+        vaccine: "已完成",
+        deworm: "12天前",
+        diet: "低敏胃肠",
+        timeline: [
+          { text: "例行年度健康体检（血常规、超声）", date: "2026-10-10" },
+          { text: "使用博来恩外驱滴剂一次", date: "2026-10-01" }
+        ]
+      },
+      mikan: {
+        name: "蜜柑 (Mikan)",
+        breed: "中华田园猫 · 橘白 · 1岁8个月",
+        avatar: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&w=400&q=80",
+        tag1: "活泼好动",
+        tag2: "已绝育",
+        weight: "3.80 kg",
+        vaccine: "剩30天",
+        deworm: "5天前",
+        diet: "全阶段幼成粮",
+        timeline: [
+          { text: "完成第二次妙三多接种", date: "2026-09-18" },
+          { text: "日常修剪爪子与耳道清洁", date: "2026-09-02" }
+        ]
+      },
+      sora: {
+        name: "空空 (Sora)",
+        breed: "布偶猫 · 海豹双色 · 2岁5个月",
+        avatar: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=400&q=80",
+        tag1: "长毛护理",
+        tag2: "定期排毛",
+        weight: "5.20 kg",
+        vaccine: "已完成",
+        deworm: "20天前",
+        diet: "化毛配方粮",
+        timeline: [
+          { text: "宠物店洗护与背部毛发梳理", date: "2026-10-05" },
+          { text: "食用化毛膏与冻干辅食", date: "2026-09-25" }
+        ]
+      },
+      yuzu: {
+        name: "柚子 (Yuzu)",
+        breed: "美短加白 · 银虎斑 · 8个月",
+        avatar: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&w=400&q=80",
+        tag1: "幼猫阶段",
+        tag2: "快速增重",
+        weight: "2.90 kg",
+        vaccine: "已完成",
+        deworm: "2天前",
+        diet: "幼猫高蛋白粮",
+        timeline: [
+          { text: "体外驱虫海乐妙服用一次", date: "2026-10-22" },
+          { text: "称重 2.90kg 增长顺利", date: "2026-10-15" }
+        ]
+      }
+    };
+
+    let currentSelectedCat = "natsume";
+
+    // Switch Selected Cat
+    function switchCat(catKey) {
+      currentSelectedCat = catKey;
+      const cat = catData[catKey];
+      if (!cat) return;
+
+      // Update Active Tab Styling
+      document.querySelectorAll('.cat-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      const activeTab = document.getElementById(`tab-${catKey}`);
+      if (activeTab) {
+        activeTab.classList.add('active');
+      }
+
+      // Smooth Switch Display
+      const display = document.getElementById('catProfileDisplay');
+      display.style.opacity = '0.3';
+
+      setTimeout(() => {
+        document.getElementById('catAvatar').src = cat.avatar;
+        document.getElementById('catName').innerText = cat.name;
+        document.getElementById('catBreed').innerText = cat.breed;
+        document.getElementById('catTag1').innerText = cat.tag1;
+        document.getElementById('catTag2').innerText = cat.tag2;
+        document.getElementById('catWeight').innerText = cat.weight;
+        document.getElementById('catVaccine').innerText = cat.vaccine;
+        document.getElementById('catDeworm').innerText = cat.deworm;
+        document.getElementById('catDiet').innerText = cat.diet;
+
+        renderTimeline(cat.timeline);
+        display.style.opacity = '1';
+      }, 150);
+    }
+
+    // Render Timeline List
+    function renderTimeline(timelineList) {
+      const container = document.getElementById('catTimeline');
+      if (!timelineList || timelineList.length === 0) {
+        container.innerHTML = '<li class="text-[#5a6a80]">暂无记录</li>';
+        return;
+      }
+
+      container.innerHTML = timelineList.map((item, idx) => `
+        <li class="flex items-center justify-between ${idx < timelineList.length - 1 ? 'border-b border-slate-100 pb-2' : ''}">
+          <span class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#2c3e55]"></span>
+            <span>${item.text}</span>
+          </span>
+          <span class="text-[10px] text-slate-400">${item.date}</span>
+        </li>
+      `).join('');
+    }
+
+    // Modal Control
+    function openLogModal() {
+      document.getElementById('modalCatSelect').value = currentSelectedCat;
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('modalLogDate').value = today;
+      document.getElementById('logModal').classList.remove('hidden');
+      document.getElementById('logModal').classList.add('flex');
+    }
+
+    function closeLogModal() {
+      document.getElementById('logModal').classList.add('hidden');
+      document.getElementById('logModal').classList.remove('flex');
+    }
+
+    // Handle Form Submit
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const catKey = document.getElementById('modalCatSelect').value;
+      const type = document.getElementById('modalRecordType').value;
+      const text = document.getElementById('modalLogText').value;
+      const date = document.getElementById('modalLogDate').value;
+
+      if (catData[catKey]) {
+        catData[catKey].timeline.unshift({
+          text: `[${type}] ${text}`,
+          date: date
+        });
+
+        // If recording weight, update current weight
+        if (type.includes('体重') && text.includes('kg')) {
+          const match = text.match(/\d+(\.\d+)?/);
+          if (match) {
+            catData[catKey].weight = `${match[0]} kg`;
+          }
+        }
+
+        // Re-render if current cat is active
+        if (catKey === currentSelectedCat) {
+          switchCat(catKey);
+        }
+      }
+
+      closeLogModal();
+      document.getElementById('modalLogText').value = '';
+    }
+
+    // Initial Load
+    window.onload = function() {
+      switchCat('natsume');
+    };
+  </script>
+</body>
+</html>
